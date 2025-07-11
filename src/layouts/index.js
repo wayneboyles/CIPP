@@ -77,10 +77,6 @@ export const Layout = (props) => {
   const [menuItems, setMenuItems] = useState(nativeMenuItems);
   const lastUserSettingsUpdate = useRef(null);
   const currentTenant = settings?.currentTenant;
-  const currentRole = ApiGetCall({
-    url: "/api/me",
-    queryKey: "authmecipp",
-  });
   const [hideSidebar, setHideSidebar] = useState(false);
 
   const swaStatus = ApiGetCall({
@@ -88,6 +84,12 @@ export const Layout = (props) => {
     queryKey: "authmeswa",
     staleTime: 120000,
     refetchOnWindowFocus: true,
+  });
+
+  const currentRole = ApiGetCall({
+    url: "/api/me",
+    queryKey: "authmecipp",
+    waiting: !swaStatus.isSuccess || swaStatus.data?.clientPrincipal === null,
   });
 
   useEffect(() => {
@@ -110,11 +112,28 @@ export const Layout = (props) => {
               }
             }
 
-            // Check permission
+            // Check permission with pattern matching support
             if (item.permissions && item.permissions.length > 0) {
-              const hasPermission = userPermissions?.some((perm) =>
-                item.permissions.includes(perm)
-              );
+              const hasPermission = userPermissions?.some((userPerm) => {
+                return item.permissions.some((requiredPerm) => {
+                  // Exact match
+                  if (userPerm === requiredPerm) {
+                    return true;
+                  }
+
+                  // Pattern matching - check if required permission contains wildcards
+                  if (requiredPerm.includes("*")) {
+                    // Convert wildcard pattern to regex
+                    const regexPattern = requiredPerm
+                      .replace(/\./g, "\\.") // Escape dots
+                      .replace(/\*/g, ".*"); // Convert * to .*
+                    const regex = new RegExp(`^${regexPattern}$`);
+                    return regex.test(userPerm);
+                  }
+
+                  return false;
+                });
+              });
               if (!hasPermission) {
                 return null;
               }
