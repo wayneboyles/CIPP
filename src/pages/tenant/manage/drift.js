@@ -28,7 +28,7 @@ import tabOptions from "./tabOptions.json";
 import standardsData from "/src/data/standards.json";
 import { createDriftManagementActions } from "./driftManagementActions";
 import { ExecutiveReportButton } from "/src/components/ExecutiveReportButton";
-import { CippAutoComplete } from "../../../../components/CippComponents/CippAutocomplete";
+import { CippAutoComplete } from "../../../components/CippComponents/CippAutocomplete";
 
 const ManageDriftPage = () => {
   const router = useRouter();
@@ -811,7 +811,6 @@ const ManageDriftPage = () => {
       tabOptions={tabOptions}
       title={title}
       subtitle={subtitle}
-      backUrl="/tenant/standards/list-standards"
       actions={actions}
       actionsData={{}}
       isFetching={driftApi.isFetching || standardsApi.isFetching || comparisonApi.isFetching}

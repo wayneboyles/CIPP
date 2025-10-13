@@ -33,7 +33,7 @@ import {
   ExpandMore,
 } from "@mui/icons-material";
 import tabOptions from "./tabOptions.json";
-import { useSettings } from "../../../../hooks/use-settings";
+import { useSettings } from "../../../hooks/use-settings";
 import { createDriftManagementActions } from "./driftManagementActions";
 
 const Page = () => {
@@ -143,7 +143,6 @@ const Page = () => {
     <HeaderedTabbedLayout
       tabOptions={tabOptions}
       title={title}
-      backUrl="/tenant/standards/list-standards"
       actions={actions}
       actionsData={{}}
       isFetching={logsData.isLoading}
