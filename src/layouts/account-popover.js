@@ -24,10 +24,9 @@ import {
 import { usePopover } from "../hooks/use-popover";
 import { paths } from "../paths";
 import { ApiGetCall } from "../api/ApiCall";
-import { CogIcon } from "@heroicons/react/24/outline";
-import { useQueryClient } from "@tanstack/react-query";
-import DocumentTextIcon from "@heroicons/react/24/outline/DocumentTextIcon";
+import { CogIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useReleaseNotes } from "../contexts/release-notes-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const AccountPopover = (props) => {
   const {
@@ -45,6 +44,19 @@ export const AccountPopover = (props) => {
   const orgData = ApiGetCall({
     url: "/api/me",
     queryKey: "authmecipp",
+  });
+
+  const userDetails = orgData.data?.clientPrincipal?.userDetails;
+
+  // Cache user photo with user-specific key
+  const userPhoto = ApiGetCall({
+    url: "/api/ListUserPhoto",
+    data: { UserID: userDetails },
+    queryKey: `userPhoto-${userDetails}`,
+    waiting: !!userDetails,
+    staleTime: Infinity,
+    responseType: "blob",
+    convertToDataUrl: true,
   });
 
   const handleLogout = useCallback(async () => {
@@ -66,15 +78,12 @@ export const AccountPopover = (props) => {
       sx={{
         height: 40,
         width: 40,
+        fontSize: 20,
       }}
       variant="rounded"
-      src={
-        orgData.data?.clientPrincipal?.userDetails
-          ? `/api/ListUserPhoto?UserID=${orgData.data?.clientPrincipal?.userDetails}`
-          : ""
-      }
+      src={userPhoto.data && !userPhoto.isError ? userPhoto.data : undefined}
     >
-      {orgData.data?.userDetails?.[0] || ""}
+      {userDetails?.[0]?.toUpperCase() || ""}
     </Avatar>
   );
 
