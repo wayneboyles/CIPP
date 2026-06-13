@@ -11,6 +11,8 @@ import {
   Button,
   Box,
   Input,
+  Tooltip,
+  Alert,
 } from "@mui/material";
 import { CippAutoComplete } from "./CippAutocomplete";
 import { CippTextFieldWithVariables } from "./CippTextFieldWithVariables";
@@ -55,6 +57,7 @@ export const CippFormComponent = (props) => {
     helperText,
     disableVariables = false,
     includeSystemVariables = false,
+    row,
     ...other
   } = props;
   const { errors } = useFormState({ control: formControl.control });
@@ -92,6 +95,13 @@ export const CippFormComponent = (props) => {
         </Typography>
       );
 
+    case "alert":
+      return (
+        <Alert severity={other.severity || "info"} sx={{ my: 1 }}>
+          {label}
+        </Alert>
+      );
+
     case "hidden":
       return (
         <input
@@ -121,54 +131,62 @@ export const CippFormComponent = (props) => {
               )}
             />
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
         </>
       );
 
     case "textField":
       return (
         <>
-          <div>
-            <Controller
-              name={convertedName}
-              control={formControl.control}
-              defaultValue={defaultValue || ""}
-              rules={validators}
-              render={({ field }) =>
-                !disableVariables ? (
-                  <CippTextFieldWithVariables
-                    {...other}
-                    variant="filled"
-                    fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    label={label}
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    includeSystemVariables={includeSystemVariables}
-                  />
-                ) : (
-                  <TextField
-                    variant="filled"
-                    fullWidth
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    {...other}
-                    label={label}
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                  />
-                )
-              }
-            />
-          </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          <Tooltip title={label || ""} placement="top" arrow>
+            <div>
+              <Controller
+                name={convertedName}
+                control={formControl.control}
+                defaultValue={defaultValue || ""}
+                rules={validators}
+                render={({ field }) =>
+                  !disableVariables ? (
+                    <CippTextFieldWithVariables
+                      {...other}
+                      variant="filled"
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      label={label}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      includeSystemVariables={includeSystemVariables}
+                    />
+                  ) : (
+                    <TextField
+                      variant="filled"
+                      fullWidth
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      {...other}
+                      label={label}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  )
+                }
+              />
+            </div>
+          </Tooltip>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
@@ -179,32 +197,37 @@ export const CippFormComponent = (props) => {
     case "textFieldWithVariables":
       return (
         <>
-          <div>
-            <Controller
-              name={convertedName}
-              control={formControl.control}
-              defaultValue={defaultValue || ""}
-              rules={validators}
-              render={({ field }) => (
-                <CippTextFieldWithVariables
-                  {...other}
-                  variant="filled"
-                  fullWidth
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  label={label}
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  tenantFilter={tenantFilter}
-                  includeSystemVariables={includeSystemVariables}
-                />
-              )}
-            />
-          </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          <Tooltip title={label || ""} placement="top" arrow>
+            <div>
+              <Controller
+                name={convertedName}
+                control={formControl.control}
+                defaultValue={defaultValue || ""}
+                rules={validators}
+                render={({ field }) => (
+                  <CippTextFieldWithVariables
+                    {...other}
+                    variant="filled"
+                    fullWidth
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    label={label}
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    tenantFilter={tenantFilter}
+                    includeSystemVariables={includeSystemVariables}
+                  />
+                )}
+              />
+            </div>
+          </Tooltip>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
@@ -216,22 +239,37 @@ export const CippFormComponent = (props) => {
       return (
         <>
           <div>
-            <TextField
-              type="password"
-              variant="filled"
-              fullWidth
-              InputLabelProps={{
-                shrink: true,
-              }}
-              {...other}
-              {...formControl.register(convertedName, { ...validators })}
-              label={label}
-              defaultValue={defaultValue}
+            <Controller
+              name={convertedName}
+              control={formControl.control}
+              defaultValue={defaultValue ?? ""}
+              rules={validators}
+              render={({ field }) => (
+                <Tooltip title={label || ""} placement="top" arrow>
+                  <TextField
+                    type="password"
+                    variant="filled"
+                    fullWidth
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    {...other}
+                    label={label}
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    inputRef={field.ref}
+                  />
+                </Tooltip>
+              )}
             />
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
@@ -243,21 +281,25 @@ export const CippFormComponent = (props) => {
       return (
         <>
           <div>
-            <TextField
-              type="number"
-              variant="filled"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              {...other}
-              {...formControl.register(convertedName, { ...validators })}
-              label={label}
-              defaultValue={defaultValue}
-            />
+            <Tooltip title={label || ""} placement="top" arrow>
+              <TextField
+                type="number"
+                variant="filled"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                {...other}
+                {...formControl.register(convertedName, { ...validators })}
+                label={label}
+                defaultValue={defaultValue}
+              />
+            </Tooltip>
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
@@ -280,14 +322,16 @@ export const CippFormComponent = (props) => {
                     checked={Boolean(field.value)}
                     {...other}
                     {...formControl.register(convertedName, { ...validators })}
-                  />
+                  />,
                 )
               }
             />
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
@@ -303,9 +347,11 @@ export const CippFormComponent = (props) => {
             <Checkbox {...other} {...formControl.register(convertedName, { ...validators })} />
             <label>{label}</label>
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
         </>
       );
 
@@ -331,8 +377,10 @@ export const CippFormComponent = (props) => {
               render={({ field }) => {
                 return (
                   <RadioGroup
+                    row={row}
                     value={field.value || ""}
                     onChange={(e) => field.onChange(e.target.value)}
+                    onBlur={field.onBlur}
                     {...other}
                   >
                     {props.options.map((option, idx) => (
@@ -348,9 +396,11 @@ export const CippFormComponent = (props) => {
               }}
             />
           </FormControl>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
         </>
       );
 
@@ -371,6 +421,7 @@ export const CippFormComponent = (props) => {
                   label={label}
                   multiple={false}
                   onChange={(value) => field.onChange(value?.value)}
+                  onBlur={field.onBlur}
                 />
               )}
             />
@@ -383,21 +434,38 @@ export const CippFormComponent = (props) => {
         </>
       );
 
-    case "autoComplete":
+    case "autoComplete": {
+      // Resolve options if it's a function
+      const resolvedOptions =
+        typeof other.options === "function" ? other.options(row) : other.options;
+
+      // Wrap validate function to pass row as third parameter
+      const resolvedValidators = validators
+        ? {
+            ...validators,
+            validate:
+              typeof validators.validate === "function"
+                ? (value, formValues) => validators.validate(value, formValues, row)
+                : validators.validate,
+          }
+        : validators;
+
       return (
         <div>
           <Controller
             name={convertedName}
             control={formControl.control}
-            rules={validators}
+            rules={resolvedValidators}
             render={({ field }) => (
               <MemoizedCippAutoComplete
                 {...other}
+                options={resolvedOptions}
                 isFetching={other.isFetching}
                 variant="filled"
                 defaultValue={field.value}
                 label={label}
                 onChange={(value) => field.onChange(value)}
+                onBlur={field.onBlur}
               />
             )}
           />
@@ -414,6 +482,7 @@ export const CippFormComponent = (props) => {
           )}
         </div>
       );
+    }
 
     case "richText": {
       const editorInstanceRef = React.useRef(null);
@@ -492,7 +561,7 @@ export const CippFormComponent = (props) => {
               acc[csvHeader] = internalKey;
               return acc;
             },
-            {}
+            {},
           );
 
           return data.map((row) => {
@@ -572,6 +641,7 @@ export const CippFormComponent = (props) => {
                           field.onChange(null); // Handle the case where no date is selected
                         }
                       }}
+                      onClose={field.onBlur}
                       ampm={false}
                       minutesStep={15}
                       inputFormat="yyyy/MM/dd HH:mm" // Display format
@@ -677,14 +747,17 @@ export const CippFormComponent = (props) => {
                         other.onChange(file);
                       }
                     }}
+                    onBlur={field.onBlur}
                   />
                 </Box>
               )}
             />
           </div>
-          <Typography variant="subtitle3" color="error">
-            {get(errors, convertedName, {})?.message}
-          </Typography>
+          {get(errors, convertedName, {})?.message && (
+            <Typography variant="subtitle3" color="error">
+              {get(errors, convertedName, {})?.message}
+            </Typography>
+          )}
           {helperText && (
             <Typography variant="subtitle3" color="text.secondary">
               {helperText}
